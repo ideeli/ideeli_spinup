@@ -17,7 +17,7 @@ class Environment
     fog_opts = { :aws_access_key_id     => keys[:aws_access_key_id],
                  :aws_secret_access_key => keys[:aws_secret_access_key],
                  :provider              => 'AWS', 
-                 :region                => @region  }
+                 :region                => @region }
 
     @compute = Fog::Compute.new(fog_opts)
   end
