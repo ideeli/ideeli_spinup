@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require 'ideeli_spinup'
+require 'pp'
+require 'yaml'
+require 'optparse'
+require 'rubygems'
+require 'fog'
+
+
+config = YAML.load_file('config/ideeli_spinup.yaml')
+options = { :account           => nil,
+            :region            => 'us-east-1',
+            :availability_zone => nil,
+            :image             => 'lucid64',
+            :instance_type     => nil,
+            :subnet            => nil,
+            :security_group    => 'default' }
+
+
+env = IdeeliSpinup::Environment.new(config, options)
+pp env.availability_zones
+printf "Image: %s\n", env.image_from_name(options[:image] )
+s = IdeeliSpinup::Server.new('foo3.bar.com', env, {})
+
+printf "Hostname: %s, AZ: %s\n", s.hostname, s.availability_zone
+printf "default account: %s\n", env.default_account_name
