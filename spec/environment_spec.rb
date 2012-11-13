@@ -100,9 +100,7 @@ describe IdeeliSpinup::Environment do
        config
      end
 
-     let(:env) do
-       IdeeliSpinup::Environment.new(config, @base_options) 
-     end
+     let(:env) { IdeeliSpinup::Environment.new(config, @base_options) }
 
      it "should only return only 1 key" do
        env.regional_subnets(config[:subnets]).size.should == 1
@@ -112,5 +110,22 @@ describe IdeeliSpinup::Environment do
        env.regional_subnets(config[:subnets]).keys.first.should == 'subnet_east'
      end
  
+   end
+
+   describe '#security_group_from_name' do
+     let(:env) { IdeeliSpinup::Environment.new(@base_config, @base_options)  }
+
+     it "should return a sg- string if passed a friendly name of default" do
+       env.security_group_from_name('default').should =~ /^sg-/
+     end
+
+     it "should return sg-abcd1234 if passed a sg" do
+       env.security_group_from_name('sg-abcd1234').should == "sg-abcd1234"
+     end
+
+     it "should raise an exception if there is no matching friendly name" do
+       lambda { env.security_group_from_name('bogus')}.should raise_error
+     end
+
    end
 end

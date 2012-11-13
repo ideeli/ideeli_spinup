@@ -13,7 +13,6 @@ class Environment
   def initialize ( config, options )
     @region         = options[:region]
     @instance_type  = options[:instance_type]
-    @security_group = options[:security_group]
     @classes        = options[:classes]
     @parameters     = options[:parameters]
 
@@ -32,6 +31,25 @@ class Environment
                  :region                => @region }
 
     @compute = Fog::Compute.new(fog_opts)
+
+    @security_group = security_group_from_name(options[:security_group])
+  end
+
+  def security_group_from_name ( name )
+    return name if name =~ /^sg-/
+
+    sg_matches = @compute.security_groups.select { |x| x.name == name }
+
+    case sg_matches.size
+    when 1 then
+      sg_matches[0].group_id
+    when 0 then
+      raise "No security group named '#{name}'"
+    else
+      sg_list = sg_matches.map { |x| x.group_id }.join(', ')
+      raise "There are #{sg_matches.size} groups named #{name}: #{sg_list}"
+    end
+    
   end
 
 # Get the key name of the default account
