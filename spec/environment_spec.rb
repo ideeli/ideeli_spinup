@@ -4,13 +4,15 @@ require 'fog'
 describe IdeeliSpinup::Environment do
   before do
     Fog.mock!
-    @base_options = { :region            => 'us-east-1',
-                      :security_group    => 'default' }
+    @base_options = { :region         => 'us-east-1',
+                      :image          => 'lucid64',
+                      :security_group => 'default' }
  
     @base_config = { :accounts => { 'account' => 
                        { :aws_access_key_id     =>"ABCDEFG",
-                         :aws_secret_access_key =>"ABCDEFG" }
-                   } }
+                         :aws_secret_access_key =>"ABCDEFG" } },
+                     :images => { "us-east-1"=> {"lucid64"=>"ami-1234abcd"} }
+                   } 
   end
 
   describe "#default_account_name" do
@@ -48,9 +50,7 @@ describe IdeeliSpinup::Environment do
 
   describe "#image_from_name" do
     let(:env) do 
-      config = @base_config
-      config[:images] = { "us-east-1"=> {"lucid64"=>"ami-1234abcd"} }
-      IdeeliSpinup::Environment.new(config, @base_options) 
+      IdeeliSpinup::Environment.new(@base_config, @base_options) 
     end
 
     context "friendly name" do

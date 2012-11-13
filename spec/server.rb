@@ -4,13 +4,15 @@ require 'ideeli_spinup'
 describe IdeeliSpinup::Server do
   before do
     Fog.mock!
-    options = { :region            => 'us-east-1',
-                :security_group    => 'default' }
+    options = { :region         => 'us-east-1',
+                :image          => 'lucid64', 
+                :security_group => 'default' }
  
     config = { :accounts => { 'account' => 
                { :aws_access_key_id     =>"ABCDEFG",
-                 :aws_secret_access_key =>"ABCDEFG" } } }
-
+                 :aws_secret_access_key =>"ABCDEFG" } },
+              :images => { "us-east-1"=> {"lucid64"=>"ami-1234abcd"} }
+             } 
     @env = IdeeliSpinup::Environment.new(config, options)
     
   end
