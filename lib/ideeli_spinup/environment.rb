@@ -3,18 +3,28 @@ class Environment
   attr_reader :compute, 
               :subnet, 
               :region,
-              :image
+              :image,
+              :security_group,
+              :key_name,
+              :instance_type,
+              :classes,
+              :parameters
 
   def initialize ( config, options )
-    @accounts = config[:accounts]
-    account   = options[:account] || default_account_name
-    keys      = @accounts[account]
-    @region   = options[:region]
-    @images   = config[:images]
-    @image    = image_from_name(options[:image])
-    @subnets  = regional_subnets(config[:subnets])
-    @subnet   = subnet_from_name(options[:subnet])
-    
+    @region         = options[:region]
+    @instance_type  = options[:instance_type]
+    @security_group = options[:security_group]
+    @classes        = options[:classes]
+    @parameters     = options[:parameters]
+
+    @accounts       = config[:accounts]
+    account         = options[:account] || default_account_name
+    keys            = @accounts[account]
+    @images         = config[:images]
+    @image          = image_from_name(options[:image])
+    @subnets        = regional_subnets(config[:subnets])
+    @subnet         = subnet_from_name(options[:subnet])
+    @key_name       = config[:keys][@region]
 
     fog_opts = { :aws_access_key_id     => keys[:aws_access_key_id],
                  :aws_secret_access_key => keys[:aws_secret_access_key],

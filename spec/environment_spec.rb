@@ -9,9 +9,10 @@ describe IdeeliSpinup::Environment do
                       :security_group => 'default' }
  
     @base_config = { :accounts => { 'account' => 
-                       { :aws_access_key_id     =>"ABCDEFG",
-                         :aws_secret_access_key =>"ABCDEFG" } },
-                     :images => { "us-east-1"=> {"lucid64"=>"ami-1234abcd"} }
+                     { :aws_access_key_id     =>"ABCDEFG",
+                       :aws_secret_access_key =>"ABCDEFG" } },
+                    :images    => { "us-east-1" => {"lucid64"=>"ami-1234abcd"} },
+                    :keys      => { 'us-east-1' => 'mykeypair' } 
                    } 
   end
 

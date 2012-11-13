@@ -11,7 +11,8 @@ describe IdeeliSpinup::Server do
     config = { :accounts => { 'account' => 
                { :aws_access_key_id     =>"ABCDEFG",
                  :aws_secret_access_key =>"ABCDEFG" } },
-              :images => { "us-east-1"=> {"lucid64"=>"ami-1234abcd"} }
+              :images    => { "us-east-1" => {"lucid64"=>"ami-1234abcd"} },
+              :keys      => { 'us-east-1' => 'mykeypair' } 
              } 
     @env = IdeeliSpinup::Environment.new(config, options)
     

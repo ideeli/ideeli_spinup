@@ -8,6 +8,9 @@ require 'optparse'
 require 'rubygems'
 require 'fog'
 
+def get_binding ( environment, hostname )
+  binding
+end
 
 logger = Logger.new $stdout
 logger.level = Logger::DEBUG
@@ -18,11 +21,16 @@ options = { :account           => nil,
             :availability_zone => nil,
             :image             => 'lucid64',
             :instance_type     => nil,
-            :subnet            => 'vpc1_public',
-            :security_group    => 'default',
-            :logger            => logger }
+            :subnet            => 'vpc1_private',
+            :security_group    => 'sg-9c14f9f3',
+            :logger            => logger, 
+            :classes           => nil,
+            :parameters        => nil }
 
-hostnames = %w[dam1.testing.ideeli.com dam3.testing.ideeli.com]
+hostnames = %w[abrown3.opstest.ideeli.com]
+options[:classes] = %w[mongodb-node]
+options[:parameters] = { 'rails_env' => 'opstest' }
+
 
 env = IdeeliSpinup::Environment.new(config, options)
 
@@ -45,7 +53,9 @@ hostnames.each do |hostname|
     exit_code += 1
     next
   end
-  s = IdeeliSpinup::Server.new(hostname, env, :logger => logger )
+  s = IdeeliSpinup::Server.new(hostname, env, :logger     => logger, 
+                                              :binding    => get_binding(env, hostname),
+                                              :bootscript => config[:bootscript])
   pp s.spinup
   logger.debug sprintf("Hostname: %s, AZ: %s, Subnet: %s", s.hostname, s.availability_zone, s.subnet)
 end 

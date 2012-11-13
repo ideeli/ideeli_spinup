@@ -1,17 +1,30 @@
+require 'erb'
+
 module IdeeliSpinup
 class Server
   attr_accessor :availability_zone, 
                 :hostname,
-                :subnet
+                :subnet,
+                :bootscript
                 
   def initialize ( hostname, environment, options = {} )
     @hostname          = IdeeliSpinup::Hostname.new(hostname)
     @environment       = environment
     @subnet            = @environment.subnet
     @availability_zone = options[:availability_zone] || calc_az_from_hostname
-    @instance_type     = options[:instance_type]
+    @instance_type     = @environment.instance_type
     @logger            = options[:logger]
-    @security_group    = options[:security_group]
+    @bootscript        = evaluate_bootscript(options[:bootscript], options[:binding])
+  end
+
+  def evaluate_bootscript ( bootscript, binding )
+    return nil unless bootscript
+    erb = ERB.new(bootscript,0,'<>')
+    if binding 
+      erb.result(binding)
+    else
+      erb.result
+    end
   end
 
   def log ( msg, level = Logger::DEBUG )
@@ -19,11 +32,13 @@ class Server
   end
 
   def spinup
-    @environment.compute.servers.create( :subnet_id         => @subnet,
-                                         :availability_zone => @availability_zone,
-                                         :flavor_id         => @instance_type,
-                                         :image_id          => @environment.image,
-                                         :groups            => [@security_group] )
+    @environment.compute.servers.create( :subnet_id          => @subnet,
+                                         :availability_zone  => @availability_zone,
+                                         :flavor_id          => @instance_type,
+                                         :image_id           => @environment.image,
+                                         :security_group_ids => @environment.security_group,
+                                         :key_name           => @environment.key_name,
+                                         :user_data          => @bootscript )
   end
 
 # Public: Return the String of the availability zone based on a modulus
