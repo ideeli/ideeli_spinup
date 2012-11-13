@@ -2,16 +2,19 @@ module IdeeliSpinup
 class Environment
   attr_reader :compute, 
               :subnet, 
-              :region
+              :region,
+              :image
 
   def initialize ( config, options )
     @accounts = config[:accounts]
     account   = options[:account] || default_account_name
     keys      = @accounts[account]
-    @images   = config[:images]
     @region   = options[:region]
+    @images   = config[:images]
+    @image    = image_from_name(options[:image])
     @subnets  = regional_subnets(config[:subnets])
     @subnet   = subnet_from_name(options[:subnet])
+    
 
     fog_opts = { :aws_access_key_id     => keys[:aws_access_key_id],
                  :aws_secret_access_key => keys[:aws_secret_access_key],

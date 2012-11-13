@@ -46,6 +46,7 @@ hostnames.each do |hostname|
     next
   end
   s = IdeeliSpinup::Server.new(hostname, env, :logger => logger )
+  pp s.spinup
   logger.debug sprintf("Hostname: %s, AZ: %s, Subnet: %s", s.hostname, s.availability_zone, s.subnet)
 end 
 

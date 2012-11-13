@@ -9,11 +9,21 @@ class Server
     @environment       = environment
     @subnet            = @environment.subnet
     @availability_zone = options[:availability_zone] || calc_az_from_hostname
+    @instance_type     = options[:instance_type]
     @logger            = options[:logger]
+    @security_group    = options[:security_group]
   end
 
   def log ( msg, level = Logger::DEBUG )
     @logger.add(level) { msg } if @logger
+  end
+
+  def spinup
+    @environment.compute.servers.create( :subnet_id         => @subnet,
+                                         :availability_zone => @availability_zone,
+                                         :flavor_id         => @instance_type,
+                                         :image_id          => @environment.image,
+                                         :groups            => [@security_group] )
   end
 
 # Public: Return the String of the availability zone based on a modulus
