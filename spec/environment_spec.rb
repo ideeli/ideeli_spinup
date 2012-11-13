@@ -5,41 +5,12 @@ describe IdeeliSpinup::Environment do
   before do
     Fog.mock!
     @base_options = { :region            => 'us-east-1',
-                      :image             => 'lucid64',
                       :security_group    => 'default' }
  
-    @base_config = { :accounts => 
-                     { 'account' => 
+    @base_config = { :accounts => { 'account' => 
                        { :aws_access_key_id     =>"ABCDEFG",
                          :aws_secret_access_key =>"ABCDEFG" }
-                     }
-                   }
-    @config = {:subnets=>
-                {"vpc1_public"=>{:id=>"subnet-a2790ec9", :region=>"us-east-1"},
-                 "vpc1_private"=>{:id=>"subnet-a7790ecc", :region=>"us-east-1"}},
-               :classifier=>
-                {:url=>"https://ic.ideeli.com:3001",
-                 :type=>"iclassify",
-                 :username=>"abrown",
-                 :password=>"iDftP$Il"},
-               :security_groups=>{:"us-east-1"=>"default"},
-               :accounts=>
-                {"another"=>
-                  {:aws_access_key_id=>"ABCDEFG",
-                   :aws_secret_access_key=>"ABCDEFG"},
-                 "default"=>
-                  {:aws_access_key_id=>"123456789",
-                   :aws_secret_access_key=>"123456789"}},
-               :images=>
-                {"us-west-1"=>
-                  {"default"=>"ami-73ad8836",
-                   "lucid64ebs"=>"ami-19ad885c",
-                   "lucid64"=>"ami-73ad8836"},
-                 "us-east-1"=>
-                  {"default"=>"ami-3fe54d56",
-                   "lucid64ebs"=>"ami-d5e54dbc",
-                   "lucid64"=>"ami-3fe54d56"}},
-               :keys=>{:"us-east-1"=>"mykeypair"}}
+                   } }
   end
 
   describe "#default_account_name" do

@@ -37,6 +37,4 @@ describe IdeeliSpinup::Hostname do
       end
     end
   end
-
-
 end
