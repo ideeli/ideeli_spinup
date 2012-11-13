@@ -8,7 +8,6 @@ class Server
     @environment       = environment
     @availability_zone = options[:availability_zone] || calc_az
     @logger            = options[:logger]
-    log('Initializing server')
   end
 
   def log ( msg, level = Logger::DEBUG )

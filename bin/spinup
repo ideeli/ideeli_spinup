@@ -22,15 +22,30 @@ options = { :account           => nil,
             :security_group    => 'default',
             :logger            => logger }
 
-hostnames = %w[foo.bar.com foo10.bar.com]
+hostnames = %w[dam1.testing.ideeli.com dam3.testing.ideeli.com]
 
 env = IdeeliSpinup::Environment.new(config, options)
 
-logger.debug env.availability_zones
-logger.debug sprintf( "Image: %s", env.image_from_name(options[:image]) )
-logger.debug sprintf("default account: %s", env.default_account_name)
+classifier = IdeeliSpinup::Classifier.get( IdeeliSpinup::Classifier::IClassify,
+                                           :url      => config[:classifier][:url],
+                                           :username => config[:classifier][:username],
+                                           :password => config[:classifier][:password] )
 
+
+logger.debug sprintf( "Available zones %s", env.availability_zones.join(', '))
+logger.debug sprintf( "Using AMI %s", env.image_from_name(options[:image]) )
+logger.debug sprintf( "default account: %s", env.default_account_name)
+
+exit_code = 0
 hostnames.each do |hostname|
+  hostname_exists = classifier.exists?(hostname)
+  if hostname_exists 
+    logger.error sprintf("Node %s exists in node classifier and not purged", hostname)
+    exit_code += 1
+    next
+  end
   s = IdeeliSpinup::Server.new(hostname, env, :logger => logger )
   logger.debug sprintf("Hostname: %s, AZ: %s", s.hostname, s.availability_zone)
 end 
+
+exit exit_code

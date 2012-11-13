@@ -7,9 +7,7 @@ class Hostname
   end
 
   def each
-    @hostname.split('.').each do |x|
-      yield x
-    end
+    @hostname.split('.').each { |x| yield x }
   end
 
   def numeric_part
