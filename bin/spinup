@@ -18,7 +18,7 @@ options = { :account           => nil,
             :availability_zone => nil,
             :image             => 'lucid64',
             :instance_type     => nil,
-            :subnet            => nil,
+            :subnet            => 'vpc1_public',
             :security_group    => 'default',
             :logger            => logger }
 
@@ -35,6 +35,7 @@ classifier = IdeeliSpinup::Classifier.get( IdeeliSpinup::Classifier::IClassify,
 logger.debug sprintf( "Available zones %s", env.availability_zones.join(', '))
 logger.debug sprintf( "Using AMI %s", env.image_from_name(options[:image]) )
 logger.debug sprintf( "default account: %s", env.default_account_name)
+logger.debug sprintf( "Subnet: %s", env.subnet)
 
 exit_code = 0
 hostnames.each do |hostname|
@@ -45,7 +46,7 @@ hostnames.each do |hostname|
     next
   end
   s = IdeeliSpinup::Server.new(hostname, env, :logger => logger )
-  logger.debug sprintf("Hostname: %s, AZ: %s", s.hostname, s.availability_zone)
+  logger.debug sprintf("Hostname: %s, AZ: %s, Subnet: %s", s.hostname, s.availability_zone, s.subnet)
 end 
 
 exit exit_code

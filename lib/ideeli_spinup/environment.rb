@@ -1,6 +1,8 @@
 module IdeeliSpinup
 class Environment
-  attr_reader :compute, :subnet, :region
+  attr_reader :compute, 
+              :subnet, 
+              :region
 
   def initialize ( config, options )
     @accounts = config[:accounts]
@@ -8,11 +10,8 @@ class Environment
     keys      = @accounts[account]
     @images   = config[:images]
     @region   = options[:region]
-    @subnet   = nil
-
-    if options[:subnet]
-      @subnet = config[:subnets][options[:subnet]][:id]
-    end
+    @subnets  = regional_subnets(config[:subnets])
+    @subnet   = subnet_from_name(options[:subnet])
 
     fog_opts = { :aws_access_key_id     => keys[:aws_access_key_id],
                  :aws_secret_access_key => keys[:aws_secret_access_key],
@@ -51,6 +50,7 @@ class Environment
   def az_from_subnet
     @compute.subnets.select { |x| x.subnet_id == @subnet }.first.availability_zone  
   end
+
 # Internal: Return the AWS ami name for the current region 
 #           given a user friendly.  If name starts with ami-
 #           fallthrough and return the passed in String.
@@ -65,12 +65,42 @@ class Environment
 #   o.image_from_name('ami-3fe54d56')
 #   # => "ami-3fe54d56"
 #
-# Returns a String of the ami name.
+# Returns a String of the ami id.
 #
   def image_from_name ( name )
     name =~ /^ami-/ ? name : @images[@region][name]  
   end
-end # class
 
+# Internal: Return the AWS subnet name given a user friendly name.  
+#           If name starts with subnet- then fallthrough and 
+#           return the passed in String.
+#
+# name - The friendly name
+#
+# Examples
+#   
+#   o.subnet_from_name('public_vpc1')
+#   # => "subnet-3fe54d56"
+#
+#   o.image_from_name('subnet-3fe54d56')
+#   # => "subnet-3fe54d56"
+#
+# Returns a String of the subnet id.
+#
+  def subnet_from_name ( name )
+    return name if name =~ /^subnet-/ || name.nil?
+
+    if @subnets[name]
+      @subnets[name][:id]
+    else
+      raise "Subnet #{name} not found in config."
+    end
+  end
+
+  def regional_subnets ( subnets )
+    return [] unless subnets
+    Hash[subnets.select { |k,v| v[:region] == @region }]
+  end
+end # class
 
 end # module

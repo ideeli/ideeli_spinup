@@ -1,18 +1,21 @@
 module IdeeliSpinup
 class Server
   attr_accessor :availability_zone, 
-                :hostname
+                :hostname,
+                :subnet
                 
   def initialize ( hostname, environment, options = {} )
     @hostname          = IdeeliSpinup::Hostname.new(hostname)
     @environment       = environment
-    @availability_zone = options[:availability_zone] || calc_az
+    @subnet            = @environment.subnet
+    @availability_zone = options[:availability_zone] || calc_az_from_hostname
     @logger            = options[:logger]
   end
 
   def log ( msg, level = Logger::DEBUG )
     @logger.add(level) { msg } if @logger
   end
+
 # Public: Return the String of the availability zone based on a modulus
 #         of the hostname.  Return the first available zone if there is 
 #         no number at the end of the hostname.  Return the zone passed
@@ -32,7 +35,7 @@ class Server
 #
 # Returns a String of the availability zone
 #
-  def calc_az 
+  def calc_az_from_hostname
     return @availability_zone if @availability_zone
 
     zones = @environment.availability_zones
