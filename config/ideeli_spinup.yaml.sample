@@ -1,0 +1,63 @@
+--- 
+:accounts: 
+  supported: &default_account
+    :aws_access_key_id: XXXXXXXXXXXXXXX
+    :aws_secret_access_key: XXXXXXXXXXXXXXXX
+  default: *default_account
+
+:images:
+  us-east-1:
+    lucid64: &default_us_east_1 ami-3fe54d56
+    lucid64ebs: ami-d5e54dbc
+    default: *default_us_east_1
+  us-west-1:
+    lucid64: &default_us_west_1 ami-73ad8836
+    lucid64ebs: ami-19ad885c
+    default: *default_us_west_1
+
+:subnets:
+  vpc1_public:
+    :region: us-east-1
+    :id: subnet-1234abcd
+  vpc1_private:
+    :region: us-east-1
+    :id: subnet-5678abcd
+
+:keys:
+  us-east-1: mykeypair
+
+:classifier:
+  :type: iclassify
+  :username: myuser
+  :password: mypass
+  :url: https://ic.example.com
+
+:bootscript: |
+  <%
+    require 'yaml'
+    output = {}
+    output['classes']    = environment.classes
+    output['parameters'] = environment.parameters
+  %> 
+  #!/bin/sh
+  cat > /etc/puppet-ext.yaml <<EOF
+  <%= output.to_yaml %>EOF
+  rm boot.sh
+  wget http://host.example.com/boot.sh
+  chmod 744 boot.sh
+  mkdir /mnt/log
+  ./boot.sh <%= hostname %> 2>&1 | tee /mnt/log/boot-$(date +'%Y-%m-%d-%H:%M')
+
+:spinup_email: 
+  :body: |
+    To: Ideeli Tech <email@ideeli.com>
+    From: Spinup script <email@ideeli.com>
+    Subject: Spinning up <%= hostname %>
+
+    spinning up <%= hostname %> as instance <%= server.id %> in <%= server.availability_zone %>.
+    Actual spinup not guaranteed.
+  :to:
+    - email@ideeli.com
+  :from: email@ideeli.com
+  :server: localhost
+

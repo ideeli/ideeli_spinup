@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version     = IdeeliSpinup::VERSION
   s.authors     = ["Aaron Brown"]
   s.email       = ["abrown@ideeli.com"]
-  s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.homepage    = "https://github.com/ideeli/ideeli_spinup"
+  s.summary     = "Ideeli's AWS spinup script"
+  s.description = "Ideeli's AWS spinup script"
 
   s.rubyforge_project = "ideeli_spinup"
 
