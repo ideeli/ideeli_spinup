@@ -5,6 +5,7 @@ require 'logger'
 require 'pp'
 require 'yaml'
 require 'optparse'
+require 'net/smtp'
 require 'rubygems'
 require 'fog'
 
@@ -12,28 +13,67 @@ def get_binding ( environment, hostname )
   binding
 end
 
-logger = Logger.new $stdout
-logger.level = Logger::DEBUG
+def get_email_binding ( server, hostname )
+  binding
+end
 
-config = YAML.load_file('config/ideeli_spinup.yaml')
+exit_code    = 0
+logger       = Logger.new $stdout
+logger.level = Logger::INFO
+
 options = { :account           => nil,
             :region            => 'us-east-1',
             :availability_zone => nil,
-            :image             => 'lucid64',
+            :image             => nil,
             :instance_type     => nil,
             :subnet            => 'vpc1_private',
             :security_group    => 'sg-9c14f9f3',
             :logger            => logger, 
-            :classes           => nil,
-            :parameters        => nil }
+            :classes           => [],
+            :parameters        => {},
+            :config_file       => 'config/ideeli_spinup.yaml' }
 
-hostnames = %w[abrown3.opstest.ideeli.com]
-options[:classes] = %w[mongodb-node]
-options[:parameters] = { 'rails_env' => 'opstest' }
+opts = OptionParser.new
+opts.banner = "Usage: spinup [options] HOST ..."
 
+opts.on("-c", "=CLASS", "Make puppet use class CLASS") do |val| 
+  options[:classes].push(val) 
+end
+opts.on("-p", /[a-zA-Z0-9_-]+=.*/,"=PARAMETER=VALUE", 
+        "Set puppet variable PARAMETER to VALUE")  do |val| 
+  a = val.split('=',2) 
+  options[:parameters][a[0]] = a[1]
+end
+opts.on("-i", "=INSTANCE-TYPE", 
+        "Use INSTANCE-TYPE (default m1.small)")      { |val| options[:instance_type] = val }
+opts.on("-c", "--config FILE", "Config file")        { |val| options[:config_file] = val }
+opts.on("-g", "=SECURITY-GROUP", 
+        "Use SECURITY-GROUP (default default)")      { |val| options[:security_group] = val }
+opts.on("-m", "=AMI-ID", 
+        "AMI-ID or internally defined image name")   { |val| options[:image] = val }
+opts.on("-z", "=AZ", 
+        "Use AZ as availability zone (default nil)") { |val| options[:availability_zone] = val }
+opts.on("-s", "--subnet SUBNET",
+        "Subnet ID or friendly name")                { |val| options[:subnet] = val }
+#opts.on("--no-purge") {|val| no_purge = true} 
+#opts.on("--force-purge") {|val| force_purge = true} 
+opts.on("-a", "--account", "=ACCOUNT-NAME", 
+        "Which (internally defined) AWS account to use") do |name|
+  options[:account] = name
+end
+opts.on("-d", "--debug", "Enable debug output") { logger.level = Logger::DEBUG }
+opts.on("-h", "--help",  "Show this message") do
+  puts opts
+  exit 1
+end
+opts.separator "--"
+opts.separator "Example, to spin up admin4.loadtest1.ideeli.com:"
+opts.separator "./spinup --account=supported -i c1.medium -m ami-1cd73375 -c mongrel-node -p rails_env=production -p num_mongrels=0 -p num_admin_mongrels=10 admin4.production.ideeli.com"
 
-env = IdeeliSpinup::Environment.new(config, options)
+hostnames = opts.parse(ARGV)
 
+config     = YAML.load_file(options[:config_file])
+env        = IdeeliSpinup::Environment.new(config, options)
 classifier = IdeeliSpinup::Classifier.get( IdeeliSpinup::Classifier::IClassify,
                                            :url      => config[:classifier][:url],
                                            :username => config[:classifier][:username],
@@ -43,9 +83,7 @@ classifier = IdeeliSpinup::Classifier.get( IdeeliSpinup::Classifier::IClassify,
 logger.debug sprintf( "Available zones %s", env.availability_zones.join(', '))
 logger.debug sprintf( "Using AMI %s", env.image_from_name(options[:image]) )
 logger.debug sprintf( "default account: %s", env.default_account_name)
-logger.debug sprintf( "Subnet: %s", env.subnet)
 
-exit_code = 0
 hostnames.each do |hostname|
   hostname_exists = classifier.exists?(hostname)
   if hostname_exists 
@@ -53,11 +91,19 @@ hostnames.each do |hostname|
     exit_code += 1
     next
   end
-  s = IdeeliSpinup::Server.new(hostname, env, :logger     => logger, 
-                                              :binding    => get_binding(env, hostname),
-                                              :bootscript => config[:bootscript])
-#  pp s.spinup
-  logger.debug sprintf("Hostname: %s, AZ: %s, Subnet: %s", s.hostname, s.availability_zone, s.subnet)
+  s = IdeeliSpinup::Server.new(hostname, env, 
+                               :logger     => logger, 
+                               :binding    => get_binding(env, hostname),
+                               :bootscript => config[:bootscript])
+  server = s.spinup
+  logger.debug "server object: #{server.inspect}"
+  logger.info "spinning up #{hostname} as instance #{server.id} in #{s.availability_zone}"
+  logger.info sprintf("subnet: %s", server.subnet_id) if s.subnet
+
+  if email = config[:spinup_email]
+    body = ERB.new(email[:body]).result(get_email_binding(server,hostname))
+    Net::SMTP.start(email[:server]) { |smtp| smtp.send_message(body, email[:to], email[:from]) }
+  end
 end 
 
 exit exit_code
