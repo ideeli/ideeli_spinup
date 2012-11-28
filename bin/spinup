@@ -72,6 +72,12 @@ opts.separator "./spinup --account=supported -i c1.medium -m ami-1cd73375 -c mon
 
 hostnames = opts.parse(ARGV)
 
+if hostnames.empty?
+  logger.fatal "No hostnames were specified."
+  $stderr.puts opts
+  exit 1
+end
+
 config     = YAML.load_file(options[:config_file])
 env        = IdeeliSpinup::Environment.new(config, options)
 classifier = IdeeliSpinup::Classifier.get( IdeeliSpinup::Classifier::IClassify,
@@ -83,6 +89,7 @@ classifier = IdeeliSpinup::Classifier.get( IdeeliSpinup::Classifier::IClassify,
 logger.debug sprintf( "Available zones %s", env.availability_zones.join(', '))
 logger.debug sprintf( "Using AMI %s", env.image_from_name(options[:image]) )
 logger.debug sprintf( "default account: %s", env.default_account_name)
+
 
 hostnames.each do |hostname|
   hostname_exists = classifier.exists?(hostname)
@@ -102,7 +109,11 @@ hostnames.each do |hostname|
 
   if email = config[:spinup_email]
     body = ERB.new(email[:body]).result(get_email_binding(server,hostname))
-    Net::SMTP.start(email[:server]) { |smtp| smtp.send_message(body, email[:to], email[:from]) }
+    begin
+      Net::SMTP.start(email[:server]) { |smtp| smtp.send_message(body, email[:to], email[:from]) }
+    rescue Exception => e
+      logger.warn "Unable to send email: #{e.message}"
+    end
   end
 end 
 
