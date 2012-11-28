@@ -11,8 +11,8 @@ bundle install
 
 or download the gem
 ```
-wget https://github.com/downloads/ideeli/ideeli_spinup/ideeli_spinup-0.0.1.gem
-gem install ideeli_spinup-0.0.1.gem
+wget https://github.com/downloads/ideeli/ideeli_spinup/ideeli_spinup-0.0.2.gem
+gem install ideeli_spinup-0.0.2.gem
 ```
 
 To Run
