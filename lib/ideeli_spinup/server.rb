@@ -15,6 +15,7 @@ class Server
     @instance_type     = @environment.instance_type
     @logger            = options[:logger]
     @bootscript        = evaluate_bootscript(options[:bootscript], options[:binding])
+    @tags              = { 'Name' => @hostname }
   end
 
   def evaluate_bootscript ( bootscript, binding )
@@ -38,7 +39,8 @@ class Server
                                          :image_id           => @environment.image,
                                          :security_group_ids => @environment.security_group,
                                          :key_name           => @environment.key_name,
-                                         :user_data          => @bootscript )
+                                         :user_data          => @bootscript,
+                                         :tags               => @tags )
   end
 
 # Public: Return the String of the availability zone based on a modulus
