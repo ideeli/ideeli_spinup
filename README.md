@@ -9,17 +9,25 @@ cd ideeli_spinup
 bundle install
 ```
 
+or download the gem
+```
+wget https://github.com/downloads/ideeli/ideeli_spinup/ideeli_spinup-0.0.1.gem
+gem install ideeli_spinup-0.0.1.gem
+```
+
 To Run
 ======
 
-Use bundler to execute. An example config file is in config/ideeli_spinup.yaml.sample
+If running from a git checkout, use bundler to execute. An example config file is in config/ideeli_spinup.yaml.sample
 
 ```
 bundle exec bin/spinup -c configfile.yaml OPTIONS
 ```
 
-
-
+If installed from a gem, just run spinup directly
+```
+spinup -c configfile.yaml OPTIONS
+```
 
 Tests
 =====
