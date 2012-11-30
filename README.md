@@ -11,8 +11,8 @@ bundle install
 
 or download the gem
 ```
-curl -u 'github username' -L -O https://github.com/downloads/ideeli/ideeli_spinup/ideeli_spinup-0.0.3.gem
-gem install ideeli_spinup-0.0.3.gem
+curl -u 'github username' -L -O https://github.com/downloads/ideeli/ideeli_spinup/ideeli_spinup-0.0.4.gem
+gem install ideeli_spinup-0.0.4.gem
 ```
 
 To Run
