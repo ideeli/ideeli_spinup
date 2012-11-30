@@ -11,8 +11,8 @@ bundle install
 
 or download the gem
 ```
-curl -u 'github username' -L -O https://github.com/downloads/ideeli/ideeli_spinup/ideeli_spinup-0.0.2.gem
-gem install ideeli_spinup-0.0.2.gem
+curl -u 'github username' -L -O https://github.com/downloads/ideeli/ideeli_spinup/ideeli_spinup-0.0.3.gem
+gem install ideeli_spinup-0.0.3.gem
 ```
 
 To Run
@@ -26,7 +26,7 @@ bundle exec bin/spinup -c configfile.yaml OPTIONS
 
 If installed from a gem, just run spinup directly
 ```
-spinup -c configfile.yaml OPTIONS
+spinup -f configfile.yaml OPTIONS
 ```
 
 Tests

@@ -46,7 +46,7 @@ opts.on("-p", /[a-zA-Z0-9_-]+=.*/,"=PARAMETER=VALUE",
 end
 opts.on("-i", "=INSTANCE-TYPE", 
         "Use INSTANCE-TYPE (default m1.small)")      { |val| options[:instance_type] = val }
-opts.on("-c", "--config FILE", "Config file")        { |val| options[:config_file] = val }
+opts.on("-f", "--file FILE", "Config file")          { |val| options[:config_file] = val }
 opts.on("-g", "=SECURITY-GROUP", 
         "Use SECURITY-GROUP (default default)")      { |val| options[:security_group] = val }
 opts.on("-m", "=AMI-ID", 
